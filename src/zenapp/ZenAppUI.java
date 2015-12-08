@@ -8,10 +8,16 @@ package zenapp;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
+import javafx.scene.web.WebView;
 import org.apache.http.*;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.oltu.oauth2.client.*;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
+import org.apache.oltu.oauth2.client.response.OAuthClientResponse;
 import org.apache.oltu.oauth2.common.*;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 
@@ -179,7 +185,7 @@ public class ZenAppUI extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) throws OAuthSystemException, IOException {
+    public static void main(String args[]) throws IOException {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -204,46 +210,28 @@ public class ZenAppUI extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
+        /*
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new ZenAppUI().setVisible(true);
             }
         });
+        */
+
+        String client_id = "ddf184d4494542c9897493c38c4217ba";
+        String response_type = "code";
+        DefaultHttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost("https://oauth.yandex.ru/authorize?"
+                + "response_type="+response_type
+                + "&client_id="+client_id);
+        HttpResponse response;
+        response = client.execute(post);
+        post.abort();
+        String headerLocation = response.getFirstHeader("location").getValue();
+        System.out.println("HL: "+headerLocation);
         
-        OAuthClientRequest request = OAuthClientRequest
-            .authorizationLocation("http://api.zenmoney.ru/oauth/access_token")
-            .setClientId("g104a5a0fc176a5e0fbd6ba471605a")
-            .setState(null)
-            .setResponseType("code")
-            .setRedirectURI("http://localhost:8080/")
-            .buildQueryMessage();
-        
-        System.out.println("\n[STEP] Grant access to app via URL:");
-        System.out.println("");
-        System.out.println(request.getLocationUri());
-        System.out.println("");
-        
-        java.awt.Desktop.getDesktop().browse(java.net.URI.create(request.getLocationUri()));
-        
-        System.out.println("\n[STEP] Get Authorization Code");
-        System.out.println("Paste authorization code:");
-        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
-        String code = null;
-        
-        code = bf.readLine();
-        
-        System.out.println("\n[STEP] Request Access Token");
-        
-        request = OAuthClientRequest
-                .tokenLocation("http://api.zenmoney.ru/oauth/access_token")
-                .setGrantType(GrantType.AUTHORIZATION_CODE)
-                .setClientId("g104a5a0fc176a5e0fbd6ba471605a")
-                .setClientSecret("526ea43d5d")
-                .setCode(code)
-                .buildQueryMessage();
-        
-        System.out.println(request.getLocationUri());
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
